@@ -213,7 +213,7 @@ export const LoadingScreen = (): JSX.Element => {
 
   const handleLogout = () => {
     localStorage.clear();
-    navigate("/login");
+    navigate("/");
   };
 
   const handleCreateProjectSubmit = async (data: {

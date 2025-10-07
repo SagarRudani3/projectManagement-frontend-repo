@@ -35,10 +35,10 @@ export const LoginScreen = () => {
     try {
       const response = await verifyOtp(email, otp);
       console.log("%c Line:32 🍷 response", "color:#33a5ff", response);
-      if (response.token) {
-        localStorage.setItem("authToken", response.token);
+      if (response.statusCode === 201 && response?.data?.token) {
+        localStorage.setItem("authToken", response?.data?.token);
         addToast("Login successful!", "success");
-        navigate("/");
+        navigate("/dashboard");
       } else {
         addToast("Login failed: No token received.", "error");
       }

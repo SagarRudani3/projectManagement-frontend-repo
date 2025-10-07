@@ -10,8 +10,8 @@ createRoot(document.getElementById("app") as HTMLElement).render(
     <ToastProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<LoginScreen />} />
-          <Route path="/" element={<LoadingScreen />} />
+          <Route path="/" element={<LoginScreen />} />
+          <Route path="/dashboard" element={<LoadingScreen />} />
         </Routes>
       </BrowserRouter>
     </ToastProvider>
