@@ -65,7 +65,7 @@ export const LoginScreen = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="px-4 sm:px-6">
-          {step !== "email" ? (
+          {step === "email" ? (
             <form onSubmit={handleLogin} className="space-y-4 sm:space-y-5">
               <div>
                 <label
