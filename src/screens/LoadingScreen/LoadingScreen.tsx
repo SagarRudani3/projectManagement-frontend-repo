@@ -11,6 +11,9 @@ import {
   Trash2Icon,
   FilePlus2,
   Edit,
+  Loader2,
+  Menu,
+  X,
 } from "lucide-react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
@@ -165,6 +168,8 @@ export const LoadingScreen = (): JSX.Element => {
   >(null);
   const [isLoadingProjects, setIsLoadingProjects] = React.useState(false);
   const [isLoadingProjectData, setIsLoadingProjectData] = React.useState(false);
+  const [isMovingTask, setIsMovingTask] = React.useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = React.useState(false);
 
   const fetchProjects = async () => {
     setIsLoadingProjects(true);
@@ -358,6 +363,7 @@ export const LoadingScreen = (): JSX.Element => {
         newColumnId,
         oldColumnId,
       });
+      setIsMovingTask(true);
       setTasks((prevTasks) =>
         prevTasks.map((task) =>
           task._id === taskId ? { ...task, columnId: newColumnId } : task
@@ -396,6 +402,8 @@ export const LoadingScreen = (): JSX.Element => {
             task._id === taskId ? { ...task, columnId: oldColumnId } : task
           )
         );
+      } finally {
+        setIsMovingTask(false);
       }
     },
     [addToast]
@@ -468,9 +476,33 @@ export const LoadingScreen = (): JSX.Element => {
           )}
         </Modal>
 
-        <div className="bg-[url(/background-noise.svg)] bg-cover bg-[50%_50%] w-full h-screen flex">
-          <div className="flex flex-1 w-full h-full items-start min-w-[1280px]">
-            <aside className="flex flex-col w-[220px] items-start justify-between px-2 py-3 self-stretch">
+        <div className="bg-[url(/background-noise.svg)] bg-cover bg-[50%_50%] w-full h-screen flex overflow-hidden">
+          <div className="flex flex-1 w-full h-full items-start">
+            {/* Mobile Menu Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="fixed top-3 left-3 z-50 lg:hidden"
+              onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+            >
+              {isMobileSidebarOpen ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Menu className="w-5 h-5" />
+              )}
+            </Button>
+
+            {/* Overlay for mobile sidebar */}
+            {isMobileSidebarOpen && (
+              <div
+                className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+                onClick={() => setIsMobileSidebarOpen(false)}
+              />
+            )}
+
+            <aside className={`flex flex-col w-[220px] sm:w-[240px] items-start justify-between px-2 py-3 self-stretch bg-white lg:bg-transparent fixed lg:relative inset-y-0 left-0 z-40 transition-transform duration-300 ${
+              isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+            }`}>
               <ScrollArea className="flex flex-col items-start gap-3 flex-1 self-stretch w-full">
                 <div className="flex h-8 items-center gap-2.5 w-full">
                   <Button
@@ -519,8 +551,13 @@ export const LoadingScreen = (): JSX.Element => {
                         variant="ghost"
                         className="w-6 h-6 p-0"
                         onClick={() => setIsCreateProjectModalOpen(true)}
+                        disabled={isCreatingProject}
                       >
-                        <PlusIcon className="w-3.5 h-3.5" />
+                        {isCreatingProject ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <PlusIcon className="w-3.5 h-3.5" />
+                        )}
                       </Button>
                     </div>
 
@@ -620,13 +657,13 @@ export const LoadingScreen = (): JSX.Element => {
               </div>
             </aside>
 
-            <main className="flex flex-col items-start gap-3 pl-0 pr-3 py-3 flex-1 self-stretch">
-              <header className="flex h-8 items-center justify-between w-full rounded-[8px_8px_0px_0px] backdrop-blur-[5px] backdrop-brightness-[100%] [-webkit-backdrop-filter:blur(5px)_brightness(100%)]">
+            <main className="flex flex-col items-start gap-3 pl-0 sm:pl-0 pr-2 sm:pr-3 py-3 flex-1 self-stretch ml-0 lg:ml-0 w-full lg:w-auto overflow-hidden">
+              <header className="flex h-auto sm:h-8 items-center justify-between w-full rounded-[8px_8px_0px_0px] backdrop-blur-[5px] backdrop-brightness-[100%] [-webkit-backdrop-filter:blur(5px)_brightness(100%)] pl-12 lg:pl-0 flex-wrap gap-2">
                 <div className="inline-flex h-6 gap-1 items-center">
                   <div className="inline-flex h-5 items-center justify-center gap-1 px-0.5 py-0 rounded">
                     <BuildingIcon className="w-4 h-4" />
                     <div className="inline-flex h-4 items-center gap-2 px-0.5 py-0 rounded-sm">
-                      <h1 className="font-base-medium font-[number:var(--base-medium-font-weight)] text-[#333333] text-[length:var(--base-medium-font-size)] tracking-[var(--base-medium-letter-spacing)] leading-[var(--base-medium-line-height)] [font-style:var(--base-medium-font-style)]">
+                      <h1 className="font-base-medium font-[number:var(--base-medium-font-weight)] text-[#333333] text-[length:var(--base-medium-font-size)] tracking-[var(--base-medium-letter-spacing)] leading-[var(--base-medium-line-height)] [font-style:var(--base-medium-font-style)] text-sm sm:text-base">
                         Page Title
                       </h1>
                     </div>
@@ -635,13 +672,25 @@ export const LoadingScreen = (): JSX.Element => {
 
                 <Button
                   variant="outline"
-                  className="h-6 gap-1 p-2 border-[#00000014] h-auto"
+                  className="h-8 sm:h-6 gap-1 px-2 sm:px-2 py-2 border-[#00000014] h-auto text-xs sm:text-sm"
                   onClick={() => setIsCreateProjectModalOpen(true)}
+                  disabled={isCreatingProject}
                 >
-                  <PlusIcon className="w-3.5 h-3.5" />
-                  <span className="font-base-medium font-[number:var(--base-medium-font-weight)] text-[#666666] text-[length:var(--base-medium-font-size)] tracking-[var(--base-medium-letter-spacing)] leading-[var(--base-medium-line-height)] [font-style:var(--base-medium-font-style)]">
-                    New Project
-                  </span>
+                  {isCreatingProject ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span className="font-base-medium font-[number:var(--base-medium-font-weight)] text-[#666666] text-[length:var(--base-medium-font-size)] tracking-[var(--base-medium-letter-spacing)] leading-[var(--base-medium-line-height)] [font-style:var(--base-medium-font-style)]">
+                        Creating...
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <PlusIcon className="w-3.5 h-3.5" />
+                      <span className="font-base-medium font-[number:var(--base-medium-font-weight)] text-[#666666] text-[length:var(--base-medium-font-size)] tracking-[var(--base-medium-letter-spacing)] leading-[var(--base-medium-line-height)] [font-style:var(--base-medium-font-style)]">
+                        New Project
+                      </span>
+                    </>
+                  )}
                 </Button>
               </header>
 
